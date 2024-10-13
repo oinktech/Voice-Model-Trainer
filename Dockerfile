@@ -5,8 +5,7 @@ FROM python:3.8-alpine
 WORKDIR /app
 
 
-# 复制 requirements.in
-COPY requirements.txt .
+COPY . .
 
 
 
@@ -14,7 +13,7 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 # 复制项目代码
-COPY . .
+
 
 # 暴露端口
 EXPOSE 10000
