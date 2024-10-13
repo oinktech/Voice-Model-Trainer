@@ -1,10 +1,7 @@
 from flask import Flask, render_template, request, redirect, url_for, flash, send_file
-from transformers import Wav2Vec2ForCTC, Wav2Vec2Processor
-from flax import linen as nn
-from flax import serialization
+from transformers import FlaxWav2Vec2ForCTC, Wav2Vec2Processor
 import jax
 import jax.numpy as jnp
-import numpy as np
 import soundfile as sf
 import os
 import shutil
@@ -14,7 +11,7 @@ app.secret_key = 'secretkey123'
 app.config['UPLOAD_FOLDER'] = 'uploads'
 app.config['MODEL_FOLDER'] = 'models'
 
-# 確保目錄存在
+# 确保目录存在
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 os.makedirs(app.config['MODEL_FOLDER'], exist_ok=True)
 
@@ -36,7 +33,7 @@ def index():
 
         try:
             processor = Wav2Vec2Processor.from_pretrained(model_path)
-            model = Wav2Vec2ForCTC.from_pretrained(model_path)
+            model = FlaxWav2Vec2ForCTC.from_pretrained(model_path)
             audio_input, _ = sf.read(audio_path)
             input_values = processor(audio_input, return_tensors="np", sampling_rate=16000).input_values
 
@@ -67,14 +64,13 @@ def train():
 
         try:
             processor = Wav2Vec2Processor.from_pretrained("facebook/wav2vec2-base-960h")
-            model = Wav2Vec2ForCTC.from_pretrained("facebook/wav2vec2-base-960h")
+            model = FlaxWav2Vec2ForCTC.from_pretrained("facebook/wav2vec2-base-960h")
 
             audio_input, _ = sf.read(audio_path)
             input_values = processor(audio_input, return_tensors="np", sampling_rate=16000).input_values
             labels = jnp.array([1, 2, 3])  # 模擬的標籤
 
-            # 模型訓練過程（簡化處理）
-            model.train()
+            # 模型訓練過程（简化处理）
             model.save_pretrained(os.path.join(app.config['MODEL_FOLDER'], "fine_tuned_model"))
             processor.save_pretrained(os.path.join(app.config['MODEL_FOLDER'], "fine_tuned_model"))
 
