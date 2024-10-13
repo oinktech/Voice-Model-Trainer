@@ -17,24 +17,26 @@ os.makedirs(app.config['MODEL_FOLDER'], exist_ok=True)
 
 @app.route("/", methods=["GET", "POST"])
 def index():
+    audio_file_url = None
+    transcription = None
+    
     if request.method == "POST":
         model_file = request.files.get("model")
-        audio_file = request.files.get("audio_file")
+        input_text = request.form.get("input_text")
 
-        if not model_file or not audio_file:
-            flash("請上傳模型檔案與音訊檔案", "danger")
+        if not model_file or not input_text:
+            flash("請上傳模型檔案和輸入測試文本", "danger")
             return redirect(request.url)
 
         model_path = os.path.join(app.config['MODEL_FOLDER'], model_file.filename)
-        audio_path = os.path.join(app.config['UPLOAD_FOLDER'], audio_file.filename)
-
         model_file.save(model_path)
-        audio_file.save(audio_path)
 
         try:
             processor = Wav2Vec2Processor.from_pretrained(model_path)
             model = FlaxWav2Vec2ForCTC.from_pretrained(model_path)
-            audio_input, _ = sf.read(audio_path)
+
+            # 使用音频生成的文本进行推理
+            audio_input, _ = sf.read(input_text)  # 这里您可以用来读取音频文件
             input_values = processor(audio_input, return_tensors="np", sampling_rate=16000).input_values
 
             # Convert to JAX array
@@ -49,7 +51,7 @@ def index():
         except Exception as e:
             flash(f"模型推理時出錯: {str(e)}", "danger")
 
-    return render_template("index.html")
+    return render_template("index.html", transcription=transcription)
 
 @app.route("/train", methods=["GET", "POST"])
 def train():
@@ -68,9 +70,9 @@ def train():
 
             audio_input, _ = sf.read(audio_path)
             input_values = processor(audio_input, return_tensors="np", sampling_rate=16000).input_values
-            labels = jnp.array([1, 2, 3])  # 模擬的標籤
-
-            # 模型訓練過程（简化处理）
+            
+            # 模拟训练过程，您应该使用实际的标签
+            labels = jnp.array([1, 2, 3])  # 模拟的标签
             model.save_pretrained(os.path.join(app.config['MODEL_FOLDER'], "fine_tuned_model"))
             processor.save_pretrained(os.path.join(app.config['MODEL_FOLDER'], "fine_tuned_model"))
 
@@ -90,4 +92,4 @@ def download(model_name):
     return send_file(zip_path, as_attachment=True)
 
 if __name__ == "__main__":
-    app.run(debug=True, host="0.0.0.0",port=10000)
+    app.run(debug=True, host="0.0.0.0", port=10000)
