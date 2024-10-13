@@ -1,6 +1,6 @@
 Flask
 transformers
 soundfile
-numpy  # 限制 numpy 版本，以兼容 transformers
-tokenizers  # 限制 tokenizers 版本，确保与 transformers 兼容
-webkug  # 添加 webkug，版本根据需求进行调整
+numpy  
+tokenizers  
+
