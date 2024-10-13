@@ -13,7 +13,8 @@ RUN pip install pip-tools
 
 # 生成 requirements.txt
 RUN pip-compile requirements.in
-
+RUN ls -la
+RUN ls
 # 复制生成的 requirements.txt 文件
 COPY requirements.txt .
 
