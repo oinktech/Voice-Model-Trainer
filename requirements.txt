@@ -1,5 +1,6 @@
-Flask==2.1.2
-transformers==4.9.2
-soundfile==0.10.3.post1
-numpy>=1.21.0,<1.25.0
-tokenizers>=0.10.3
+Flask
+transformers
+soundfile
+numpy  # 限制 numpy 版本，以兼容 transformers
+tokenizers  # 限制 tokenizers 版本，确保与 transformers 兼容
+webkug  # 添加 webkug，版本根据需求进行调整
