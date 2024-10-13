@@ -1,35 +1,70 @@
 <!DOCTYPE html>
-<html lang="zh-Hant">
+<html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>語音模型訓練器</title>
+    <title>測試模型</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+        .container {
+            background-color: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+    </style>
 </head>
 <body>
-    <div class="container">
-        <h1 class="mt-5">語音模型訓練器</h1>
-        {% with messages = get_flashed_messages(with_categories=true) %}
-          {% if messages %}
-            {% for category, message in messages %}
-              <div class="alert alert-{{ category }}">{{ message }}</div>
-            {% endfor %}
-          {% endif %}
-        {% endwith %}
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <a class="navbar-brand" href="#">模型測試平台</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav">
+                <li class="nav-item">
+                    <a class="nav-link" href="/">測試模型</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/train">訓練模型</a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+    
+    <div class="container mt-5">
+        <h1 class="text-center">測試您的語音模型</h1>
         <form method="POST" enctype="multipart/form-data">
             <div class="form-group">
-                <label for="model">上傳模型檔案:</label>
-                <input type="file" class="form-control-file" name="model" required>
+                <label for="model">上傳模型檔案：</label>
+                <input type="file" name="model" class="form-control" required>
             </div>
             <div class="form-group">
-                <label for="audio_file">上傳音頻檔案:</label>
-                <input type="file" class="form-control-file" name="audio_file" required>
+                <label for="audio_file">上傳音訊檔案：</label>
+                <input type="file" name="audio_file" class="form-control" required>
             </div>
-            <button type="submit" class="btn btn-primary">提交並測試模型</button>
+            <button type="submit" class="btn btn-primary btn-block">上傳並測試</button>
         </form>
+        
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        {% if transcription %}
+            <h4>轉錄結果:</h4>
+            <p>{{ transcription }}</p>
+        {% endif %}
     </div>
+    
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 </body>
 </html>
