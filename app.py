@@ -11,32 +11,31 @@ app.secret_key = 'secretkey123'
 app.config['UPLOAD_FOLDER'] = 'uploads'
 app.config['MODEL_FOLDER'] = 'models'
 
-# 确保目录存在
+# 確保目錄存在
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 os.makedirs(app.config['MODEL_FOLDER'], exist_ok=True)
 
 @app.route("/", methods=["GET", "POST"])
 def index():
-    audio_file_url = None
-    transcription = None
-    
+    transcription = None  # 初始化轉錄結果
     if request.method == "POST":
         model_file = request.files.get("model")
-        input_text = request.form.get("input_text")
+        audio_file = request.files.get("audio_file")
 
-        if not model_file or not input_text:
-            flash("請上傳模型檔案和輸入測試文本", "danger")
+        if not model_file or not audio_file:
+            flash("請上傳模型檔案與音訊檔案", "danger")
             return redirect(request.url)
 
         model_path = os.path.join(app.config['MODEL_FOLDER'], model_file.filename)
+        audio_path = os.path.join(app.config['UPLOAD_FOLDER'], audio_file.filename)
+
         model_file.save(model_path)
+        audio_file.save(audio_path)
 
         try:
             processor = Wav2Vec2Processor.from_pretrained(model_path)
             model = FlaxWav2Vec2ForCTC.from_pretrained(model_path)
-
-            # 使用音频生成的文本进行推理
-            audio_input, _ = sf.read(input_text)  # 这里您可以用来读取音频文件
+            audio_input, _ = sf.read(audio_path)
             input_values = processor(audio_input, return_tensors="np", sampling_rate=16000).input_values
 
             # Convert to JAX array
@@ -70,9 +69,9 @@ def train():
 
             audio_input, _ = sf.read(audio_path)
             input_values = processor(audio_input, return_tensors="np", sampling_rate=16000).input_values
-            
-            # 模拟训练过程，您应该使用实际的标签
-            labels = jnp.array([1, 2, 3])  # 模拟的标签
+            labels = jnp.array([1, 2, 3])  # 模擬的標籤
+
+            # 模型訓練過程（简化处理）
             model.save_pretrained(os.path.join(app.config['MODEL_FOLDER'], "fine_tuned_model"))
             processor.save_pretrained(os.path.join(app.config['MODEL_FOLDER'], "fine_tuned_model"))
 
