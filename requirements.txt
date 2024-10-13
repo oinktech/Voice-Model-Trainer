@@ -3,4 +3,5 @@ transformers
 soundfile
 numpy  
 tokenizers  
-torch
+flax
+jax
