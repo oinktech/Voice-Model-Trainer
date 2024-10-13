@@ -1,4 +1,4 @@
 Flask==2.1.2
 transformers==4.9.2
 soundfile==0.10.3.post1
-numpy==1.21.4
+numpy>=1.21.0,<2.0.0
