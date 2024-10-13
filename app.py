@@ -1,8 +1,12 @@
 from flask import Flask, render_template, request, redirect, url_for, flash, send_file
 from transformers import Wav2Vec2ForCTC, Wav2Vec2Processor
-import torch
-import os
+from flax import linen as nn
+from flax import serialization
+import jax
+import jax.numpy as jnp
+import numpy as np
 import soundfile as sf
+import os
 import shutil
 
 app = Flask(__name__)
@@ -34,11 +38,14 @@ def index():
             processor = Wav2Vec2Processor.from_pretrained(model_path)
             model = Wav2Vec2ForCTC.from_pretrained(model_path)
             audio_input, _ = sf.read(audio_path)
-            input_values = processor(audio_input, return_tensors="pt", sampling_rate=16000).input_values
+            input_values = processor(audio_input, return_tensors="np", sampling_rate=16000).input_values
 
-            with torch.no_grad():
-                logits = model(input_values).logits
-            predicted_ids = torch.argmax(logits, dim=-1)
+            # Convert to JAX array
+            input_values = jnp.array(input_values)
+
+            # Perform inference with Flax model
+            logits = model(input_values).logits
+            predicted_ids = jnp.argmax(logits, axis=-1)
             transcription = processor.decode(predicted_ids[0])
 
             flash(f"語音轉錄結果: {transcription}", "success")
@@ -63,8 +70,8 @@ def train():
             model = Wav2Vec2ForCTC.from_pretrained("facebook/wav2vec2-base-960h")
 
             audio_input, _ = sf.read(audio_path)
-            input_values = processor(audio_input, return_tensors="pt", sampling_rate=16000).input_values
-            labels = torch.tensor([1, 2, 3])  # 模擬的標籤
+            input_values = processor(audio_input, return_tensors="np", sampling_rate=16000).input_values
+            labels = jnp.array([1, 2, 3])  # 模擬的標籤
 
             # 模型訓練過程（簡化處理）
             model.train()
@@ -87,4 +94,4 @@ def download(model_name):
     return send_file(zip_path, as_attachment=True)
 
 if __name__ == "__main__":
-    app.run(debug=True, host="0.0.0.0")
+    app.run(debug=True, host="0.0.0.0",port=10000)
